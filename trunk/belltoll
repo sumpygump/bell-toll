@@ -1,0 +1,44 @@
+#!/usr/bin/env php
+<?php
+$applicationPath = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
+
+// Include path
+set_include_path(
+    implode(
+        PATH_SEPARATOR,
+        array(
+            ".",
+            $applicationPath,
+            $applicationPath . 'lib',
+        )
+    )
+);
+
+require_once 'Qi/Console/Std.php';
+require_once 'Qi/Console/Client.php';
+require_once 'Qi/Console/Terminal.php';
+require_once 'Qi/Console/ArgV.php';
+require_once 'Qi/Console/ExceptionHandler.php';
+include_once 'BelltollClient.php';
+
+$terminal = new Qi_Console_Terminal();
+$handler  = new Qi_Console_ExceptionHandler($terminal, true);
+
+$args = new Qi_Console_ArgV(
+    $argv,
+    array(
+        'arg:action' => 'Subcommand',
+        'help|h'     => 'Show help',
+        'verbose|v'  => 'Include more verbose output',
+        'quiet|q'    => 'Print less messages',
+        'version'    => 'Show version',
+        'time|t:'    => 'Date to use',
+    )
+);
+
+$belltoll = new BelltollClient($args, $terminal);
+$belltoll->setAudioPath($applicationPath . 'audio');
+
+$value = $belltoll->execute();
+
+exit((int) $value);
