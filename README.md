@@ -13,6 +13,7 @@ $ ln -s /usr/local/share/php/bell-toll/belltoll /usr/local/bin/belltoll
 ```
 
 ## Suggested Usage
+
 Add to your crontab `$ crontab -e`
 
 ```

@@ -1,0 +1,58 @@
+#!/usr/bin/env php
+<?php
+/**
+ * ▄         ▄   ▄    ▄        ▄   ▄
+ * █▄▄   ▄▄  █   █   ▄█▄   ▄▄  █   █
+ * █  █ █▄▄█ █   █    █   █  █ █   █
+ * █▄▄▀ ▀▄▄▄ ▀▄▄ ▀▄▄  ▀▄▀ ▀▄▄▀ ▀▄▄ ▀▄▄
+ *
+ * Chimes like a clock tower
+ *
+ * @author Jansen Price <jansen.price@gmail.com>
+ */
+
+// Find where the composer autoload is
+// This tool was installed as a composed dependency or directly
+$root = realpath(dirname(__DIR__));
+$autoloadLocations = array(
+    __DIR__ . '/../../autoload.php',
+    $root . DIRECTORY_SEPARATOR . 'vendor/autoload.php',
+);
+foreach ($autoloadLocations as $file) {
+    if (file_exists($file)) {
+        define('BELLTOLL_COMPOSER_AUTOLOAD', $file);
+        break;
+    }
+}
+// Composer autoload require guard
+if (!defined('BELLTOLL_COMPOSER_AUTOLOAD')) {
+    die(
+        "You must run the command `composer install` from the terminal "
+        . "in the directory '$root' before using this tool.\n"
+    );
+}
+// Load composer autoloader
+$autoload = require_once BELLTOLL_COMPOSER_AUTOLOAD;
+// This is defined in composer.json
+//$autoload->add('Belltoll', $root . '/src');
+
+$terminal = new Qi_Console_Terminal();
+$handler  = new Qi_Console_ExceptionHandler($terminal, true);
+
+$args = new Qi_Console_ArgV(
+    $argv,
+    array(
+        'help|h'     => 'Show help',
+        'verbose|v'  => 'Include more verbose output',
+        'quiet|q'    => 'Print less messages',
+        'version'    => 'Show version',
+        'time|t:'    => 'Date to use',
+    )
+);
+
+$belltoll = new Belltoll\Client($args, $terminal);
+$belltoll->setAudioPath($root . '/audio');
+
+$value = $belltoll->execute();
+
+exit((int) $value);

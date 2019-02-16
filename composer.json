@@ -1,0 +1,23 @@
+{
+    "name": "sumpygump/belltoll",
+    "description": "CLI tool to chime like a clock tower",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Jansen Price",
+            "email": "jansen.price@gmail.com"
+        }
+    ],
+    "require": {
+        "sumpygump/qi-console": "^1.2"
+    },
+    "bin": [
+        "belltoll"
+    ],
+    "autoload": {
+        "psr-4" : {
+            "Belltoll\\" : "src/Belltoll"
+        }
+    },
+    "minimum-stability": "dev"
+}

@@ -1,7 +1,7 @@
 # This is an example line to put in your cron
 # Edit your cron by typing crontab -e
 # Be sure that belltoll has execute permissions
-# Make sure the path to belltoll is correct for you system
+# Make sure the path to belltoll is correct for your system
 
 # Run belltoll every 15 minutes
 00,15,30,45 * * * * /usr/local/bin/belltoll > /dev/null 2>&1
