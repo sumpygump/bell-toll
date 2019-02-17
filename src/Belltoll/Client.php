@@ -18,6 +18,8 @@ use Qi_Console_Client;
  */
 class Client extends Qi_Console_Client
 {
+    const VERSION = '1.1';
+
     const TIME_FORMAT_HOUR = 'g';
     const TIME_FORMAT_MINUTE = 'i';
 
@@ -132,6 +134,16 @@ class Client extends Qi_Console_Client
      */
     public function execute()
     {
+        if ($this->_args->version) {
+            $this->_displayMessage(sprintf('belltoll %s', self::VERSION));
+            return 0;
+        }
+
+        if ($this->_args->help) {
+            $this->displayUsage();
+            return 0;
+        }
+
         $is_quiet = (bool) $this->_args->quiet;
         $is_verbose = (bool) $this->_args->verbose && !$is_quiet;
 
@@ -193,5 +205,18 @@ class Client extends Qi_Console_Client
         }
 
         return $file;
+    }
+
+    public function displayUsage()
+    {
+        print "belltoll " . self::VERSION . "\n";
+        print "Usage: belltoll [options]\n";
+        print "\n";
+        print "Options:\n";
+        print "  -h [--help] : Display help\n";
+        print "  -q [--quiet] : No output\n";
+        print "  -v [--verbose] : Include more verbose output\n";
+        print "  -t [--time] <time> : Use specific time instead of current time\n";
+        print "  --version : Show version and exit\n";
     }
 }

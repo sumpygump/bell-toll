@@ -257,6 +257,31 @@ final class ClientTest extends TestCase
         $result = $client->execute();
     }
 
+    public function testVersion()
+    {
+        $client = $this->createObject(['prog', '--version']);
+
+        ob_start();
+        $result = $client->execute();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('belltoll ' . Client::VERSION, $output);
+        $this->assertEquals(0, $result);
+    }
+
+    public function testHelp()
+    {
+        $client = $this->createObject(['prog', '--help']);
+
+        ob_start();
+        $result = $client->execute();
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('belltoll ' . Client::VERSION, $output);
+        $this->assertStringContainsString('--time', $output);
+        $this->assertEquals(0, $result);
+    }
+
     /**
      * Create the object under test
      *
@@ -270,7 +295,7 @@ final class ClientTest extends TestCase
             'verbose|v'  => 'Include more verbose output',
             'quiet|q'    => 'Print less messages',
             'version'    => 'Show version',
-            'time|t:'    => 'Date to use',
+            'time|t:'    => 'Time to use',
         );
 
         $argv = new \Qi_Console_ArgV($args, $rules);
