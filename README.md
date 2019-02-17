@@ -24,9 +24,20 @@ When you invoke the program it will chime like a bell tower if it is the right t
 
 The program relies on `mpg123` to be installed on your machine to actually play the audio files.
 
-You can pass the `-t` or `--time` parameter to force the program to think it is a specific time (for testing). `belltoll -t 1:30`
+You can pass the `-t` or `--time` parameter to force the program to think it is a specific time (for testing). Example: `belltoll -t 1:30`
 
 Use the `-q` or `--quiet` to make the program have no output.
+
+```
+Usage: belltoll [options]
+
+Options:
+  -h [--help] : Display help
+  -q [--quiet] : No output
+  -v [--verbose] : Include more verbose output
+  -t [--time] <time> : Use specific time instead of current time
+  --version : Show version and exit
+```
 
 ### Install as cron task
 
