@@ -12,7 +12,7 @@
         "sumpygump/qi-console": "^1.2"
     },
     "bin": [
-        "belltoll"
+        "bin/belltoll"
     ],
     "autoload": {
         "psr-4" : {
