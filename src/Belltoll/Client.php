@@ -18,6 +18,9 @@ use Qi_Console_Client;
  */
 class Client extends Qi_Console_Client
 {
+    const TIME_FORMAT_HOUR = 'g';
+    const TIME_FORMAT_MINUTE = 'i';
+
     /**
      * Path where audio files are
      *
@@ -45,6 +48,16 @@ class Client extends Qi_Console_Client
     }
 
     /**
+     * Get audio path
+     *
+     * @return string
+     */
+    public function getAudioPath()
+    {
+        return $this->_audioPath;
+    }
+
+    /**
      * Set the time
      *
      * @param string|int $time Time
@@ -53,16 +66,28 @@ class Client extends Qi_Console_Client
     public function setTime($time = null)
     {
         if (null === $time) {
-            if ($this->_args->time) {
-                $time = $this->parseTime($this->_args->time);
-            } else {
-                $time = time();
-            }
+            $time = time();
+        } else {
+            $time = $this->parseTime($time);
         }
 
         $this->_time = $time;
 
         return $this;
+    }
+
+    /**
+     * Get time
+     *
+     * @return string
+     */
+    public function getTime($format = 'Y-m-d H:i:s')
+    {
+        if (false === $format) {
+            return $this->_time;
+        }
+
+        return date($format, $this->_time);
     }
 
     /**
@@ -73,17 +98,31 @@ class Client extends Qi_Console_Client
      */
     protected function parseTime($input)
     {
-        $time = 0;
+        if (is_numeric($input) && $input > 2359) {
+            // Detect timestamp
+            return $input;
+        }
 
         preg_match('#(\d+):(\d+)#', $input, $matches);
 
+        // Assuming hour:minute
         if (count($matches) == 3) {
-            $time = mktime($matches[1], $matches[2], 0);
-        } else {
-            $time = mktime(0, (int) $input, 0);
+            return mktime($matches[1], $matches[2], 0);
         }
 
-        return $time;
+        // Assuming just minutes
+        if ($input < 60 || (int) $input == 0) {
+            return mktime(0, (int) $input, 0);
+        }
+
+        // Attempt to parse it with strtotime
+        $time = strtotime($input);
+
+        if ($time == 0) {
+            return time();
+        } else {
+            return $time;
+        }
     }
 
     /**
@@ -93,22 +132,37 @@ class Client extends Qi_Console_Client
      */
     public function execute()
     {
-        if ($this->_time == 0) {
-            $this->setTime();
+        $is_quiet = (bool) $this->_args->quiet;
+        $is_verbose = (bool) $this->_args->verbose && !$is_quiet;
+
+        if ($this->_audioPath == '') {
+            $this->_audioPath = BELLTOLL_ROOT . '/audio';
         }
 
-        $this->_displayMessage('Audio path: ' . $this->_audioPath);
-        $this->_displayMessage('Using time: ' . date('Y-m-d H:i:s', $this->_time));
+        if ($this->_args->time) {
+            $this->setTime($this->_args->time);
+        } else {
+            if ($this->_time == 0) {
+                $this->setTime();
+            }
+        }
+
+        if (!$is_quiet) {
+            $this->_displayMessage('Audio path: ' . $this->getAudioPath());
+            $this->_displayMessage('Using time: ' . $this->getTime());
+        }
 
         // select audio file based on time
         $file = $this->_selectAudioFile();
 
-        $this->_displayMessage('Selected audio file: ' . $file);
+        !$is_quiet && $this->_displayMessage('Selected audio file: ' . $file);
 
-        $cmd = sprintf("mpg123 -q %s", $file);
-        $this->_displayMessage('Command: ' . $cmd);
+        $cmd = sprintf("mpg123%s %s", (!$is_verbose ? ' -q' : ''), $file);
+        !$is_quiet && $this->_displayMessage('Command: ' . $cmd);
 
-        passthru($cmd);
+        if (!defined('BELLTOLL_NOEXECUTE')) {
+            passthru($cmd);
+        }
 
         return 0;
     }
@@ -120,21 +174,24 @@ class Client extends Qi_Console_Client
      */
     protected function _selectAudioFile()
     {
-        $minutes = date('i', $this->_time);
-        $hour    = date('g', $this->_time);
+        $minutes = $this->getTime(self::TIME_FORMAT_MINUTE);
 
         if (!in_array($minutes, array('15', '30', '45', '00'))) {
             throw new \Exception("It's not time for a bell.");
         }
 
-        $filename = $this->_audioPath . DIRECTORY_SEPARATOR . $minutes;
+        $filename = $minutes;
 
         if ($minutes == '00') {
-            $filename .= '-' . $hour;
+            $filename = sprintf("%s-%s", $filename, $this->getTime(self::TIME_FORMAT_HOUR));
         }
 
-        $filename .= '.mp3';
+        $file = sprintf("%s/%s.mp3", $this->getAudioPath(), $filename);
 
-        return $filename;
+        if (!file_exists($file)) {
+            throw new \Exception(sprintf("File '%s' not found!", $file));
+        }
+
+        return $file;
     }
 }
