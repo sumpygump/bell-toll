@@ -182,7 +182,7 @@ class Client extends Qi_Console_Client
     /**
      * Select appropriate audio file based on time
      *
-     * @return void
+     * @return string
      */
     protected function _selectAudioFile()
     {

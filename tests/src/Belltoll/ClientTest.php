@@ -93,7 +93,7 @@ final class ClientTest extends TestCase
         $actual = $client->getTime();
 
         // (It only cares about the time)
-        $this->assertEquals(date('2019-02-d 14:00:00'), $actual);
+        $this->assertEquals(date('2019-m-d 14:00:00'), $actual);
     }
 
     public function testParseTimeSettingTimestamp()
